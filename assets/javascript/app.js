@@ -1,28 +1,28 @@
-// Initialize Firebase
-var config = {
-	apiKey: "AIzaSyCV2ylST122mSQG_bBqhQV1_79ho1-1KHE",
-	authDomain: "hw7-train-station.firebaseapp.com",
-	databaseURL: "https://hw7-train-station.firebaseio.com",
-	projectId: "hw7-train-station",
-	storageBucket: "hw7-train-station.appspot.com",
-	messagingSenderId: "898708951209"
-};
+// // Initialize Firebase
+// var config = {
+// 	apiKey: "AIzaSyCV2ylST122mSQG_bBqhQV1_79ho1-1KHE",
+// 	authDomain: "hw7-train-station.firebaseapp.com",
+// 	databaseURL: "https://hw7-train-station.firebaseio.com",
+// 	projectId: "hw7-train-station",
+// 	storageBucket: "hw7-train-station.appspot.com",
+// 	messagingSenderId: "898708951209"
+// };
 
-firebase.initializeApp(config);
+// firebase.initializeApp(config);
 
-var db = firebase.database();
+// var db = firebase.database();
 
-var trainName = "";
-var trainDestination = "";
-var firstTrainTime = "";
-var trainFrequency = "";
+// var trainName = "";
+// var trainDestination = "";
+// var firstTrainTime = "";
+// var trainFrequency = "";
 
 // On clicking the 'new-train-button' (submit on page), push a new 
 // train to the database, and create a new entry that populates the table
 $("#new-train-button").on("click", function(event) {
+	event.preventDefault();
 	console.log("Clicky");
 
-	// event.preventDefault();
 
 	// trainName = $("#train-trainName").val().trim();
 	// trainDestination = $("#train-destination").val().trim();

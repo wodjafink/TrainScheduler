@@ -5,13 +5,13 @@
 	<title>Train Scheduler</title>
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
 
 	<script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
 	<script src="https://code.jquery.com/jquery.js"></script>
 	<script src="https://momentjs.com/downloads/moment.js"></script>
 
-	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
-	<script type="text/javascript" src="assets/javascript/app.js"></script>
+	<!-- <script type="text/javascript" src="assets/javascript/app.js"></script> -->
 </head>
 <body>
 	<div class="container">
@@ -76,6 +76,122 @@
 			</div>
 	    </div>
 	</div>	
+<script>
+// Initialize Firebase
+var config = {
+	apiKey: "AIzaSyCV2ylST122mSQG_bBqhQV1_79ho1-1KHE",
+	authDomain: "hw7-train-station.firebaseapp.com",
+	databaseURL: "https://hw7-train-station.firebaseio.com",
+	projectId: "hw7-train-station",
+	storageBucket: "hw7-train-station.appspot.com",
+	messagingSenderId: "898708951209"
+};
+
+firebase.initializeApp(config);
+
+var db = firebase.database();
+
+var trainName = "";
+var trainDestination = "";
+var firstTrainTime = "";
+var trainFrequency = "";
+
+// On clicking the 'new-train-button' (submit on page), push a new 
+// train to the database, and create a new entry that populates the table
+$("#new-train-button").on("click", function(event) {
+	event.preventDefault();
+	console.log("Clicky");
+
+
+	trainName = $("#train-name").val().trim();
+	trainDestination = $("#train-destination").val().trim();
+	firstTrainTime = $("#train-start").val().trim();
+	trainFrequency = $("#train-frequency").val().trim();
+
+	console.log(trainName);
+	console.log(trainDestination);
+	console.log(firstTrainTime);
+	console.log(trainFrequency);
+
+	db.ref().push({
+		trainName: trainName,
+		trainDestination: trainDestination,
+		firstTrainTime: firstTrainTime,
+		trainFrequency: trainFrequency,
+		dateAdded: firebase.database.ServerValue.TIMESTAMP
+	})
+})
+
+db.ref().orderByChild("dateAdded").on("child_added", function(childSnapshot) {
+
+	if (childSnapshot.val().trainName === undefined)
+	{
+		console.log("Got empty value from db?")
+		return;
+	}
+
+	// Log everything that's coming out of snapshot
+	trainName = childSnapshot.val().trainName;
+	trainDestination = childSnapshot.val().trainDestination;
+	firstTrainTime = childSnapshot.val().firstTrainTime;
+	trainFrequency = childSnapshot.val().trainFrequency;
+
+	var newTrain = $("<tr>");
+	
+	var newtrainName = $("<td>").append(trainName);
+	newTrain.append(newtrainName);
+
+	var newtrainDestination = $("<td>").append(trainDestination);
+	newTrain.append(newtrainDestination);
+
+	var newtrainFrequency = $("<td>").append(trainFrequency);
+	newTrain.append(newtrainFrequency);
+
+
+	// Rendering of the Next Arrival entry
+	var nextArrival = "";
+
+	//Convert string time into moment time
+	console.log("First train at " + firstTrainTime)
+	var firstTrainMoment = new moment(firstTrainTime, 'HH:mm');
+	nextArrival = firstTrainMoment.local().format('HH:mm');
+
+	// Get time for now
+	var now = new moment();
+	var compareNow = now.local().format('HH:mm')
+	// Trivial case is if the first trian hasn't arrived yet
+	console.log("Compare " + firstTrainMoment + " now " + now);
+	if (nextArrival > compareNow)
+	{
+		nextArrival = firstTrainMoment;
+	} else
+	{
+		// The non-trivial case is that trains have already been arriving, so determine
+		// the next arrival
+		while (nextArrival < compareNow)
+		{
+			nextArrival = moment(nextArrival, 'HH:mm').add(trainFrequency, 'minutes').format("HH:mm");
+		}
+		// console.log("Start next arrival at " + nextArrival + " now is " + compareNow);
+		console.log("After add start next arrival at " + nextArrival + " now is " + compareNow);
+	}
+	var newNextArrival = $("<td>").append(nextArrival);
+	newTrain.append(newNextArrival);
+
+	var diffInMinutes = moment.utc(moment(nextArrival,"HH:mm").diff(moment(compareNow,"HH:mm"))).format("m");
+	// var diffInMinutes = moment.utc(moment(nextArrival,"HH:mm").diff(moment(compareNow,"HH:mm"))).format("HH:mm");
+	console.log(parseInt(diffInMinutes))
+
+	var newMinutesAway = $("<td>").append(diffInMinutes);
+	newTrain.append(newMinutesAway);
+
+	$("tbody").append(newTrain)
+// Handle the errors
+}, function(errorObject) {
+  console.log("Errors handled: " + errorObject.code);
+});
+
+</script>
 
 </body>
 </html>
